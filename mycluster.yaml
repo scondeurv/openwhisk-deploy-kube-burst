@@ -1,31 +1,24 @@
 whisk:
   middleware:
-    rabbitmq: "amqp://guest:guest@192.168.2.36:5672"
-    redisList: "redis://54.86.7.228:6379"
-    redisStream: "redis://54.86.7.228:6379"
-  # ingress:
-  #   type: NodePort
-  #   apiHostName: 10.0.11.122
-  #   apiHostPort: 31001
-  #   useInternally: false
+    rabbitmq: "amqp://guest:guest@192.168.1.213:5672"
+    redisList: "redis://192.168.1.213:6379"
+    redisStream: "redis://192.168.1.213:6379"
   ingress:
-    type: LoadBalancer
-    annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: external
-    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:iam::165415512318:server-certificate/ow-self-signed
+     type: NodePort
+     apiHostName: 192.168.1.213
+     apiHostPort: 31001
+     useInternally: false
   versions:
     openwhisk:
       gitTag: "72bb2a1"
 controller:
   imageName: "manriurv/controller"
-  imageTag: "classic"
+  imageTag: "classic"  
 invoker:
   imageName: "manriurv/invoker"
   imageTag: "classic"
   containerFactory:
-    impl: "docker"
+    impl: "docker" 
 nginx:
   httpsNodePort: 31001
 zookeeper:
@@ -33,4 +26,3 @@ zookeeper:
 k8s:
   persistence:
     enabled: false
-
