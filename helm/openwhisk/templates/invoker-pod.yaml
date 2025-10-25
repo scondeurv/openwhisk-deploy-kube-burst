@@ -51,6 +51,10 @@ spec:
       {{- end }}
 
     spec:
+{{- if eq .Values.invoker.containerFactory.impl "docker" }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+{{- end }}
 {{- if eq .Values.invoker.containerFactory.impl "kubernetes" }}
       serviceAccountName: {{ .Release.Name }}-invoker
 {{- end }}
