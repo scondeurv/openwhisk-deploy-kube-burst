@@ -89,6 +89,8 @@ spec:
         command: [ "/bin/bash", "-c", "/init.sh --uniqueName $INVOKER_NAME" ]
 {{- end }}
         env:
+          - name: "BURST_STANDALONE"
+            value: "true"
           - name: "PORT"
             value: {{ .Values.invoker.port | quote }}
 

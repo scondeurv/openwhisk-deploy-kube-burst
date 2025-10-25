@@ -111,6 +111,8 @@ spec:
           periodSeconds: {{ .Values.probes.controller.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.probes.controller.readinessProbe.timeoutSeconds }}
         env:
+        - name: BURST_STANDALONE
+          value: "true"
         - name: "PORT"
           value: {{ .Values.controller.port | quote }}
 
