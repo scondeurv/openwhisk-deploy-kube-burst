@@ -1,16 +1,21 @@
 whisk:
   middleware:
-    rabbitmq: "amqp://guest:guest@192.168.1.213:5672"
-    redisList: "redis://192.168.1.213:6379"
-    redisStream: "redis://192.168.1.213:6379"
+    rabbitmq: "amqp://guest:guest@192.168.1.220:5672"
+    redisList: "redis://192.168.1.220:6379"
+    redisStream: "redis://192.168.1.220:6379"
   ingress:
      type: NodePort
-     apiHostName: 192.168.1.213
+     apiHostName: 192.168.1.220
      apiHostPort: 31001
      useInternally: false
   versions:
     openwhisk:
       gitTag: "72bb2a1"
+  # Aumentar timeouts para permitir subida de ZIPs grandes
+  controller:
+    timeouts:
+      idle: "5 minutes"
+      request: "5 minutes"
 controller:
   imageName: "manriurv/controller"
   imageTag: "classic"  
@@ -23,6 +28,10 @@ nginx:
   httpsNodePort: 31001
 zookeeper:
   port: 2181
+  imageName: "zookeeper"
+  imageTag: "3.5"
+  readinessProbe:
+    enabled: false
 k8s:
   persistence:
     enabled: false
