@@ -25,4 +25,5 @@ zookeeper:
   port: 2181
 k8s:
   persistence:
-    enabled: false
+    enabled: true
+    hasDefaultStorageClass: true
