@@ -1,8 +1,8 @@
 whisk:
   middleware:
-    rabbitmq: "amqp://guest:guest@192.168.49.1:5672"
-    redisList: "redis://192.168.49.1:6379"
-    redisStream: "redis://192.168.49.1:6379"
+    rabbitmq: "amqp://guest:guest@rabbitmq.default.svc.cluster.local:5672"
+    redisList: "redis://dragonfly.default.svc.cluster.local:6379"
+    redisStream: "redis://dragonfly.default.svc.cluster.local:6379"
   ingress:
      type: NodePort
      apiHostName: 192.168.1.188

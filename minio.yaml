@@ -18,6 +18,8 @@ spec:
         args:
         - server
         - /data
+        - --console-address
+        - ":9001"
         env:
         - name: MINIO_ACCESS_KEY
           value: "minioadmin"
@@ -25,6 +27,7 @@ spec:
           value: "minioadmin"
         ports:
         - containerPort: 9000
+        - containerPort: 9001
         volumeMounts:
         - name: storage
           mountPath: /data
@@ -41,6 +44,11 @@ spec:
   selector:
     app: minio
   ports:
-    - port: 30000
+    - name: api
+      port: 9000
       targetPort: 9000
       nodePort: 30000
+    - name: console
+      port: 9001
+      targetPort: 9001
+      nodePort: 30001
