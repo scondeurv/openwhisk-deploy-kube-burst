@@ -18,7 +18,7 @@ invoker:
   imageName: "manriurv/invoker"
   imageTag: "classic"
   containerFactory:
-    impl: "docker" 
+    impl: "kubernetes" 
 nginx:
   httpsNodePort: 31001
 zookeeper:

@@ -27,7 +27,7 @@ if [ "$MEM" -lt 2048 ]; then MEM=2048; fi
 
 echo "⚙️  Configurando Minikube con límites: CPUs=$CPUS, RAM=${MEM}MB"
 
-minikube start --cpus $CPUS --memory ${MEM}m --ports 31001:31001,5672:30672,15672:31672,6379:31379,9000:30000,9001:30001
+minikube start --driver podman --container-runtime=containerd --cpus $CPUS --memory ${MEM}m --ports 31001:31001,5672:30672,15672:31672,6379:31379,9000:30000,9001:30001
 
 echo "🏷️  Etiquetando el nodo para que acepte Invokers..."
 kubectl label nodes --all openwhisk-role=invoker --overwrite
