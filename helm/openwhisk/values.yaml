@@ -370,6 +370,19 @@ invoker:
       isolateUserActions: true
       replicaCount: 1
 
+# Benchmark fairness defaults.
+# For KubernetesContainerFactory deployments, action pods inherit a namespace
+# CPU default so that the benchmark can enforce 1 CPU per worker.
+benchmark:
+  workerPolicy:
+    workers: 4
+    cpuPerWorker: "1"
+    systemReservedCpu: "6"
+  actionPodCpu:
+    enabled: false
+    request: "1000m"
+    limit: "1000m"
+
 # API Gateway configurations
 apigw:
   imageName: "openwhisk/apigateway"

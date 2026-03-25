@@ -18,7 +18,16 @@ invoker:
   imageName: "manriurv/invoker"
   imageTag: "classic"
   containerFactory:
-    impl: "kubernetes" 
+    impl: "kubernetes"
+benchmark:
+  workerPolicy:
+    workers: 4
+    cpuPerWorker: "1"
+    systemReservedCpu: "6"
+  actionPodCpu:
+    enabled: true
+    request: "1000m"
+    limit: "1000m"
 nginx:
   httpsNodePort: 31001
 zookeeper:
