@@ -12,14 +12,19 @@ echo "🚀 Arrancando Minikube con mapeo de puertos..."
 # 9000: MinIO API
 # 9001: MinIO Console
 
-# Politica de benchmarking justa:
+# Politica de benchmarking:
 # - cada worker de usuario dispone de 1 CPU dedicada
-# - el clúster reserva CPU extra para controller, invoker, nginx y servicios base
+# - el clúster reserva CPU y RAM extra para controller, invoker, nginx y servicios base
+# - el host mantiene una reserva explicita y fija, en vez de una heuristica de porcentaje
 WORKER_COUNT=${OW_WORKER_COUNT:-4}
 CPU_PER_WORKER=${OW_CPU_PER_WORKER:-1}
 SYSTEM_RESERVED_CPUS=${OW_SYSTEM_RESERVED_CPUS:-6}
 MEMORY_PER_WORKER_MB=${OW_MEMORY_PER_WORKER_MB:-4096}
 SYSTEM_RESERVED_MEM_MB=${OW_SYSTEM_RESERVED_MEM_MB:-8192}
+HOST_RESERVED_CPUS=${OW_HOST_RESERVED_CPUS:-2}
+HOST_RESERVED_MEM_MB=${OW_HOST_RESERVED_MEM_MB:-8192}
+CLUSTER_CPUS_OVERRIDE=${OW_CLUSTER_CPUS:-}
+CLUSTER_MEMORY_OVERRIDE_MB=${OW_CLUSTER_MEMORY_MB:-}
 
 # Detectar recursos del sistema
 TOTAL_CPUS=$(nproc)
@@ -30,13 +35,14 @@ TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
 TARGET_CPUS=$((WORKER_COUNT * CPU_PER_WORKER + SYSTEM_RESERVED_CPUS))
 TARGET_MEM=$((WORKER_COUNT * MEMORY_PER_WORKER_MB + SYSTEM_RESERVED_MEM_MB))
 
-# Dejar siempre algo de margen al host
-MAX_CPUS=$((TOTAL_CPUS - 1))
-if [ "$MAX_CPUS" -lt 2 ]; then MAX_CPUS=$TOTAL_CPUS; fi
-MAX_MEM=$((TOTAL_MEM * 9 / 10))
+# Dejar siempre un margen fijo al host
+MAX_CPUS=$((TOTAL_CPUS - HOST_RESERVED_CPUS))
+if [ "$MAX_CPUS" -lt 2 ]; then MAX_CPUS=2; fi
+MAX_MEM=$((TOTAL_MEM - HOST_RESERVED_MEM_MB))
+if [ "$MAX_MEM" -lt 2048 ]; then MAX_MEM=2048; fi
 
-CPUS=$TARGET_CPUS
-MEM=$TARGET_MEM
+CPUS=${CLUSTER_CPUS_OVERRIDE:-$TARGET_CPUS}
+MEM=${CLUSTER_MEMORY_OVERRIDE_MB:-$TARGET_MEM}
 
 if [ "$CPUS" -gt "$MAX_CPUS" ]; then CPUS=$MAX_CPUS; fi
 if [ "$MEM" -gt "$MAX_MEM" ]; then MEM=$MAX_MEM; fi
@@ -47,6 +53,10 @@ if [ "$MEM" -lt 2048 ]; then MEM=2048; fi
 
 echo "⚙️  Politica de workers: ${WORKER_COUNT} workers x ${CPU_PER_WORKER} CPU = $((WORKER_COUNT * CPU_PER_WORKER)) CPUs de usuario"
 echo "⚙️  Reserva de sistema: ${SYSTEM_RESERVED_CPUS} CPUs, ${SYSTEM_RESERVED_MEM_MB}MB RAM"
+echo "⚙️  Reserva del host: ${HOST_RESERVED_CPUS} CPUs, ${HOST_RESERVED_MEM_MB}MB RAM"
+if [ -n "${CLUSTER_CPUS_OVERRIDE}" ] || [ -n "${CLUSTER_MEMORY_OVERRIDE_MB}" ]; then
+  echo "⚙️  Override explicito del cluster: CPUs=${CLUSTER_CPUS_OVERRIDE:-auto}, RAM=${CLUSTER_MEMORY_OVERRIDE_MB:-auto}MB"
+fi
 echo "⚙️  Configurando Minikube con límites: CPUs=$CPUS, RAM=${MEM}MB"
 
 minikube start --driver docker --cpus $CPUS --memory ${MEM}m --ports 31001:31001,5672:30672,15672:31672,6379:31379,9000:30000,9001:30001
