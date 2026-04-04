@@ -177,6 +177,9 @@ utility:
   imageTag: "1.0.0"
   imagePullPolicy: "IfNotPresent"
 
+installPackages:
+  enabled: true
+
 # Docker registry
 docker:
   registry:

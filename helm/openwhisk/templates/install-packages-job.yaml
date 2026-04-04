@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+{{- if .Values.installPackages.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -143,3 +144,4 @@ spec:
             value: {{ .Values.whisk.versions.openwhiskPackageAlarms.gitTag | quote }}
           - name: "OW_GIT_TAG_OPENWHISK_PACKAGE_KAFKA"
             value: {{ .Values.whisk.versions.openwhiskPackageKafka.gitTag | quote }}
+{{- end }}
