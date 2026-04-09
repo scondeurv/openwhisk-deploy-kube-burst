@@ -61,6 +61,25 @@ echo "⚙️  Configurando Minikube con límites: CPUs=$CPUS, RAM=${MEM}MB"
 
 minikube start --driver docker --cpus $CPUS --memory ${MEM}m --ports 31001:31001,5672:30672,15672:31672,6379:31379,9000:30000,9001:30001
 
+echo "📥 Precargando imágenes en minikube para evitar ImagePullBackOff..."
+REQUIRED_IMAGES=(
+  "busybox:latest"
+  "zookeeper:3.4"
+  "rabbitmq:3-management"
+  "redis:4.0"
+  "wurstmeister/kafka:2.12-2.3.1"
+  "manriurv/controller:classic"
+  "manriurv/invoker:classic"
+  "nginx:1.21.1"
+  "openwhisk/alarmprovider:2.3.0"
+  "openwhisk/kafkaprovider:2.1.0"
+)
+for img in "${REQUIRED_IMAGES[@]}"; do
+  echo "  loading $img..."
+  minikube image load "$img"
+done
+echo "✅ Imágenes precargadas."
+
 echo "🏷️  Etiquetando el nodo para que acepte Invokers..."
 kubectl label nodes --all openwhisk-role=invoker --overwrite
 
