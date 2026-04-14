@@ -1,21 +1,7 @@
 #!/bin/bash
-
-# Este script arranca Minikube mapeando el puerto 31001 de forma permanente
-# para que OpenWhisk sea siempre accesible en https://localhost:31001
+set -euo pipefail
 
 echo "🚀 Arrancando Minikube con mapeo de puertos..."
-# Mapeo de puertos:
-# 31001: OpenWhisk
-# 5672: RabbitMQ AMQP
-# 15672: RabbitMQ Management
-# 6379: Redis (Dragonfly)
-# 9000: MinIO API
-# 9001: MinIO Console
-
-# Politica de benchmarking:
-# - cada worker de usuario dispone de 1 CPU dedicada
-# - el clúster reserva CPU y RAM extra para controller, invoker, nginx y servicios base
-# - el host mantiene una reserva explicita y fija, en vez de una heuristica de porcentaje
 WORKER_COUNT=${OW_WORKER_COUNT:-4}
 CPU_PER_WORKER=${OW_CPU_PER_WORKER:-1}
 SYSTEM_RESERVED_CPUS=${OW_SYSTEM_RESERVED_CPUS:-6}
@@ -26,16 +12,12 @@ HOST_RESERVED_MEM_MB=${OW_HOST_RESERVED_MEM_MB:-8192}
 CLUSTER_CPUS_OVERRIDE=${OW_CLUSTER_CPUS:-}
 CLUSTER_MEMORY_OVERRIDE_MB=${OW_CLUSTER_MEMORY_MB:-}
 
-# Detectar recursos del sistema
 TOTAL_CPUS=$(nproc)
-# free -m devuelve en Megabytes. awk toma la segunda columna de la línea que empieza por Mem:
 TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
 
-# Dimensionar Minikube a partir del presupuesto de workers
 TARGET_CPUS=$((WORKER_COUNT * CPU_PER_WORKER + SYSTEM_RESERVED_CPUS))
 TARGET_MEM=$((WORKER_COUNT * MEMORY_PER_WORKER_MB + SYSTEM_RESERVED_MEM_MB))
 
-# Dejar siempre un margen fijo al host
 MAX_CPUS=$((TOTAL_CPUS - HOST_RESERVED_CPUS))
 if [ "$MAX_CPUS" -lt 2 ]; then MAX_CPUS=2; fi
 MAX_MEM=$((TOTAL_MEM - HOST_RESERVED_MEM_MB))
@@ -47,7 +29,6 @@ MEM=${CLUSTER_MEMORY_OVERRIDE_MB:-$TARGET_MEM}
 if [ "$CPUS" -gt "$MAX_CPUS" ]; then CPUS=$MAX_CPUS; fi
 if [ "$MEM" -gt "$MAX_MEM" ]; then MEM=$MAX_MEM; fi
 
-# Asegurar mínimos razonables (por si acaso)
 if [ "$CPUS" -lt 2 ]; then CPUS=2; fi
 if [ "$MEM" -lt 2048 ]; then MEM=2048; fi
 
@@ -60,6 +41,10 @@ fi
 echo "⚙️  Configurando Minikube con límites: CPUs=$CPUS, RAM=${MEM}MB"
 
 minikube start --driver docker --cpus $CPUS --memory ${MEM}m --ports 31001:31001,5672:30672,15672:31672,6379:31379,9000:30000,9001:30001
+
+echo "⏳ Esperando a que Minikube quede operativo..."
+minikube status
+kubectl get nodes >/dev/null
 
 echo "📥 Precargando imágenes en minikube para evitar ImagePullBackOff..."
 REQUIRED_IMAGES=(
@@ -85,7 +70,6 @@ kubectl label nodes --all openwhisk-role=invoker --overwrite
 
 echo "📦 Desplegando servicios auxiliares (RabbitMQ, MinIO, Redis/Dragonfly)..."
 
-# Esperar a que el ServiceAccount default esté listo
 echo "⏳ Esperando a que el sistema esté listo..."
 until kubectl get serviceaccount default > /dev/null 2>&1; do sleep 2; done
 
