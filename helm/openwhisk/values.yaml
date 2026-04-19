@@ -371,6 +371,7 @@ invoker:
           options: ""
     kubernetes:
       isolateUserActions: true
+      allowUserActionsToRedis: false
       replicaCount: 1
 
 # Benchmark fairness defaults.
