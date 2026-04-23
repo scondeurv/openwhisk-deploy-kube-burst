@@ -28,6 +28,7 @@ invoker:
   containerFactory:
     impl: "kubernetes"
     kubernetes:
+      allowUserActionsToRedis: true
       replicaCount: 2
 
 benchmark:
