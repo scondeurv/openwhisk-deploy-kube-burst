@@ -13,17 +13,23 @@ whisk:
     openwhisk:
       gitTag: "72bb2a1"
   containerPool:
-    userMemory: "8192m"
+    userMemory: "30000m"
+  limits:
+    actions:
+      time:
+        min: "100ms"
+        max: "30m"
+        std: "1m"
 
 controller:
   imageName: "manriurv/controller"
-  imageTag: "classic"
-  imagePullPolicy: IfNotPresent
+  imageTag: "latest"
+  imagePullPolicy: Always
 
 invoker:
   imageName: "manriurv/invoker"
-  imageTag: "classic"
-  imagePullPolicy: IfNotPresent
+  imageTag: "latest"
+  imagePullPolicy: Always
   jvmHeapMB: "4096"
   containerFactory:
     impl: "kubernetes"

@@ -111,8 +111,9 @@ spec:
           periodSeconds: {{ .Values.probes.controller.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.probes.controller.readinessProbe.timeoutSeconds }}
         env:
-        - name: BURST_STANDALONE
+        - name: "BURST_STANDALONE"
           value: "true"
+
         - name: "PORT"
           value: {{ .Values.controller.port | quote }}
 
@@ -191,6 +192,14 @@ spec:
           value: {{ .Values.whisk.middleware.s3.secretAccessKey | quote }}
         - name: "CONFIG_whisk_burstMiddleware_s3_sessionToken"
           value: {{ .Values.whisk.middleware.s3.sessionToken | quote }}
+
+        # Benchmark worker policy used by custom burst admission logic.
+        - name: "CONFIG_whisk_benchmark_workerPolicy_workers"
+          value: {{ .Values.benchmark.workerPolicy.workers | quote }}
+        - name: "CONFIG_whisk_benchmark_workerPolicy_cpuPerWorker"
+          value: {{ .Values.benchmark.workerPolicy.cpuPerWorker | quote }}
+        - name: "CONFIG_whisk_benchmark_workerPolicy_systemReservedCpu"
+          value: {{ .Values.benchmark.workerPolicy.systemReservedCpu | quote }}
 
         # etcd properties
 {{- if .Values.scheduler.enabled }}
